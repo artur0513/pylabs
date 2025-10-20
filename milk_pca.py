@@ -8,26 +8,31 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import train_test_split
 
 
+dir = r'C:\Users\artur\Desktop\MILK\20.09\\'
+
+
 def read_file(filename: str) -> [np.array, np.array]:
     file = open(filename)
     x = []
     y = []
+    counter = 0
 
     # Read file
     for line in file:
         if line[0].isnumeric() or line[0] == '-':
             values = line.split('\t')
-            if 1500 < float(values[0]) < 1800:
+            if (1370 < float(values[0]) < 1470 or 1120 < float(values[0]) < 1170 or 1690 < float(values[0]) < 1770) and counter % 2 == 0:
                 x.append(float(values[0]))
                 y.append(float(values[1]))
+            counter += 1
 
     return np.array(x), np.array(y)
 
 
 def get_base_y():
-    _, y_base0 = read_file(r'C:\Users\artur\Desktop\MILK\milk 20.10\dat\окно_0.dat')
-    _, y_base1 = read_file(r'C:\Users\artur\Desktop\MILK\milk 20.10\dat\окно_1.dat')
-    _, y_base2 = read_file(r'C:\Users\artur\Desktop\MILK\milk 20.10\dat\окно_2.dat')
+    _, y_base0 = read_file(dir + 'окно_0.dat')
+    _, y_base1 = read_file(dir + 'окно_1.dat')
+    _, y_base2 = read_file(dir + 'окно_2.dat')
     return (y_base0 + y_base1 + y_base2) / 3.0
 
 
@@ -52,7 +57,6 @@ def specter_pipeline(y_base, filename):
     #absorbed /= sum_absorbed
     #absorbed /= np.max(absorbed)
     # y = 1.0 - absorbed
-    #y = absorbed
 
     y = -np.log(y)
     y = (y - np.mean(y))/np.std(y)
@@ -76,14 +80,13 @@ def plot_specter(y_base, filename):
 
 
 def prepare_data_lists():
-    folder = r'C:\Users\artur\Desktop\MILK\milk 20.10\dat'
     y_base = get_base_y()
     spectra_list = []
     labels_list = []
     x = None
-    for subdir, dirs, files in os.walk(folder):
+    for subdir, dirs, files in os.walk(dir):
         for file in files:
-            path = folder + '\\' + file
+            path = dir + '\\' + file
             milk_type = get_milk_type(path)
             if not 'null' in milk_type:
                 x, y = specter_pipeline(y_base, path)
@@ -153,14 +156,14 @@ def pca_spectroscopy_analysis(spectra_list, labels_list, x, test_size=0.1, rando
 
     # 4.3 Loadings plot для PC1
     wavelengths = range(X.shape[1])  # замените на реальные длины волн!
-    axes[1, 0].plot(x, pca.components_[0, :])
+    axes[1, 0].plot(x, pca.components_[0, :], '.')
     axes[1, 0].set_xlabel('Длина волны (индекс)')
     axes[1, 0].set_ylabel('Нагрузка')
     axes[1, 0].set_title('Loadings Plot: PC1')
     axes[1, 0].grid(True, alpha=0.3)
 
     # 4.4 Loadings plot для PC2
-    axes[1, 1].plot(x, pca.components_[1, :])
+    axes[1, 1].plot(x, pca.components_[1, :], '.')
     axes[1, 1].set_xlabel('Длина волны (индекс)')
     axes[1, 1].set_ylabel('Нагрузка')
     axes[1, 1].set_title('Loadings Plot: PC2')
@@ -181,29 +184,13 @@ def pca_spectroscopy_analysis(spectra_list, labels_list, x, test_size=0.1, rando
 
 pca_spectroscopy_analysis(*prepare_data_lists(), test_size=0.1, random_state=40)
 
-'''
 y_base = get_base_y()
-plot_specter(y_base, r'C:\\Users\artur\Desktop\MILK\milk 20.10\dat\см1_1.dat')
+plot_specter(y_base, dir + 'см1_1.dat')
 
-plot_specter(y_base, r'C:\\Users\artur\Desktop\MILK\milk 20.10\dat\см2_1.dat')
-plot_specter(y_base, r'C:\\Users\artur\Desktop\MILK\milk 20.10\dat\см2_5.dat')
-plot_specter(y_base, r'C:\\Users\artur\Desktop\MILK\milk 20.10\dat\см2_10.dat')
-plt.legend()
-plt.show()
-'''
 
-y_base = get_base_y()
-plot_specter(y_base, r'C:\\Users\artur\Desktop\MILK\milk 20.10\dat\см1_1.dat')
+plot_specter(y_base, dir + 'см1_12.dat')
+plot_specter(y_base, dir + 'см2_1.dat')
+plot_specter(y_base, dir + 'см2_11.dat')
 
-#plot_specter(y_base, r'C:\\Users\artur\Desktop\MILK\milk 20.10\dat\см1_2.dat')
-#plot_specter(y_base, r'C:\\Users\artur\Desktop\MILK\milk 20.10\dat\см1_11.dat')
-plot_specter(y_base, r'C:\\Users\artur\Desktop\MILK\milk 20.10\dat\см1_12.dat')
-plot_specter(y_base, r'C:\\Users\artur\Desktop\MILK\milk 20.10\dat\см2_1.dat')
-plot_specter(y_base, r'C:\\Users\artur\Desktop\MILK\milk 20.10\dat\см2_11.dat')
-
-#plt.plot(*read_file(r'C:\Users\artur\Desktop\MILK\milk 20.10\dat\см1_1.dat'))
-#plt.plot(*read_file(r'C:\Users\artur\Desktop\MILK\milk 20.10\dat\см1_2.dat'))
-#plt.plot(*read_file(r'C:\Users\artur\Desktop\MILK\milk 20.10\dat\см1_11.dat'))
-#plt.plot(*read_file(r'C:\Users\artur\Desktop\MILK\milk 20.10\dat\см1_12.dat'))
 plt.legend()
 plt.show()
