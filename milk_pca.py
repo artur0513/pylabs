@@ -8,7 +8,7 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import train_test_split
 
 
-dir = r'C:\Users\artur\Desktop\MILK\20.09\\'
+dir = r'C:\Users\artur\Desktop\Экспериментальные данные\MILK\milk ftir dataset\\'
 
 
 def read_file(filename: str) -> [np.array, np.array]:
@@ -21,18 +21,18 @@ def read_file(filename: str) -> [np.array, np.array]:
     for line in file:
         if line[0].isnumeric() or line[0] == '-':
             values = line.split('\t')
-            if (1370 < float(values[0]) < 1470 or 1120 < float(values[0]) < 1170 or 1690 < float(values[0]) < 1770) and counter % 2 == 0:
-                x.append(float(values[0]))
-                y.append(float(values[1]))
+            #if (1370 < float(values[0]) < 1470 or 1120 < float(values[0]) < 1170 or 1690 < float(values[0]) < 1770) and counter % 2 == 0:
+            x.append(float(values[0]))
+            y.append(float(values[1]))
             counter += 1
 
     return np.array(x), np.array(y)
 
 
 def get_base_y():
-    _, y_base0 = read_file(dir + 'окно_0.dat')
-    _, y_base1 = read_file(dir + 'окно_1.dat')
-    _, y_base2 = read_file(dir + 'окно_2.dat')
+    _, y_base0 = read_file(dir + 'окно 0.dat')
+    _, y_base1 = read_file(dir + 'окно 1.dat')
+    _, y_base2 = read_file(dir + 'окно 2.dat')
     return (y_base0 + y_base1 + y_base2) / 3.0
 
 
@@ -59,6 +59,7 @@ def specter_pipeline(y_base, filename):
     # y = 1.0 - absorbed
 
     y = -np.log(y)
+    #y /= np.quantile(y, 0.9)
     y = (y - np.mean(y))/np.std(y)
     return x, y
 
@@ -69,6 +70,12 @@ def get_milk_type(filename):
         return 'см1'
     elif 'см2' in basename_without_ext:
         return 'см2'
+    elif 'обр0' in basename_without_ext:
+        return 'обр0'
+    elif 'обр1' in basename_without_ext:
+        return 'обр1'
+    elif 'обр2' in basename_without_ext:
+        return 'обр2'
     else:
         return 'null'
 
@@ -96,7 +103,7 @@ def prepare_data_lists():
     return spectra_list, labels_list, x
 
 
-def pca_spectroscopy_analysis(spectra_list, labels_list, x, test_size=0.1, random_state=42):
+def pca_spectroscopy_analysis(spectra_list, labels_list, x, test_size=0.2, random_state=42):
     # Преобразуем в numpy массивы
     X = np.array(spectra_list)  # матрица: [n_samples, n_features]
     y = np.array(labels_list)  # вектор меток
